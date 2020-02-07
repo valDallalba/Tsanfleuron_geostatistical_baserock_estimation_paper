@@ -1,0 +1,69 @@
+Data Report : Generated 09.12.19
+Alexis Neven
+
+-------------------------------Folder DEM--------------------------------------
+dsm_alt3D_2m.txt
+
+Alti3D altitude data, organised in an ascii raster. 
+Zone covered : the glacier and the area around. 
+Resolution : 2m/Pixel
+Comments : none
+
+dsm_alt3D_2m.txt
+
+Altitude data from the drone data treatement, organised in an ascii raster. 
+Zone covered : the glacier and the area around. 
+Resolution : 0.1m/Pixel
+Comments : Some zones included in the dataset are poorly calculated due to sharp gradient. Errors are possible
+
+-------------------------------Folder MASKS--------------------------------------
+Glacier_Mask_2m.txt
+
+Mask covering the Tsanfleuron and Sex Rouge glacier, organised in an ascii raster. The glacier pixel is a 1, when the non-glacier pixel is a 0. 
+Zone covered : the glacier and close surrondings. 
+Resolution : 2m/Pixel
+Comments : none
+
+Glacier_Mask_10cm.txt
+
+Mask covering the Tsanfleuron and Sex Rouge glacier, organised in an ascii raster. The glacier pixel is a 1, when the non-glacier pixel is a 0. 
+Zone covered : the glacier and close surrondings. 
+Resolution : 0.1m/Pixel
+Comments : none
+
+-------------------------------Folder PointSet--------------------------------------
+BedRock_GPR.csv
+
+Dataset in a point set csv format, containing the picking result from the GPR data. The data order is the follwoing : (1) X (2) Y (3) Z (4) time (ns) (5) Depth (m) (6) Bedrock Altitude
+Zone covered : the glacier. 
+Resolution : Variable
+Comments : none
+
+BedRock_MNT.csv
+
+Dataset in a point set csv format, containing the altitude data of the points around the glacier. This is the altitude of the bedrock where the glacier limits are. The data order is the follwoing : (1) X (2) Y (3) Bedrock Altitude
+Zone covered : limit of the glacier. 
+Resolution : Variable
+Comments : none
+
+-------------------------------Folder TI--------------------------------------
+TI_Alt1_Alti3D.txt
+
+Training image. DEM from Alti3D cropped to cover the exposed glacial bedrock. Alternative 1 (only close surrundings of the glacier) 
+Zone covered : close surronding, exposed bedrock. 
+Resolution : 2m/Pixel
+Comments : none
+
+TI_Alt1_Drone.txt
+
+Training image. DEM from the Drone cropped to cover the exposed glacial bedrock. Alternative 1 (only close surrundings of the glacier) 
+Zone covered : close surronding, exposed bedrock. 
+Resolution : 0.1m/Pixel
+Comments : none
+
+TI_Alt2_Alti3D.txt
+
+Training image. DEM from Alti3D cropped to cover the exposed glacial bedrock. Alternative 2 (wide surrundings of the glacier) 
+Zone covered : wide surronding, exposed bedrock. 
+Resolution : 2m/Pixel
+Comments : none
