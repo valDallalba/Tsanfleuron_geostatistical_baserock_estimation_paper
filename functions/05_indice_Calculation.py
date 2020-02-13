@@ -16,7 +16,7 @@ def indice_calculation(real_alt,simu_alt):
     I5 : np array of the per point standart deviation
     note : The conditioning points are removed for the calculus of I1, I2, and I3
     '''
-    
+
     import numpy as np
 
     assert len(real_alt) != 0,"List of real altitude is empty. Error"
@@ -32,7 +32,7 @@ def indice_calculation(real_alt,simu_alt):
     for i in range(len(simu_alt)):
         somme_simus = np.add(simu_alt[i],somme_simus)
         somme_erreurs = np.add(simu_alt[i]-real_alt,somme_erreurs)
-        sommes_erreurs_abs = np.add(simu_alt[i]-real_alt,sommes_erreurs_abs)
+        sommes_erreurs_abs = np.add(np.absolute(simu_alt[i]-real_alt),sommes_erreurs_abs)
 
     moyenne_simus = np.divide(somme_simus,len(simu_alt))
 
@@ -52,7 +52,8 @@ def indice_calculation(real_alt,simu_alt):
 
     I1= np.mean(moyenne_err[standard_dev != 0])
     I2= np.mean(moyenne_err_abs[standard_dev != 0])
-    I3 = np.sum(moyenne_err3/(len(simu_alt)*simu_alt[0].shape[0]*simu_alt[0].shape[1])) # Error
+    err3 = moyenne_err3/(len(simu_alt)*simu_alt[0].shape[0]*simu_alt[0].shape[1])
+    I3 = np.sum(err3[standard_dev != 0]) # Error
 
     pro = [I1, I2, I3, moyenne_simus, standard_dev]
 
