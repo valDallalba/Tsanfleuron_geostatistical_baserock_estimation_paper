@@ -22,9 +22,6 @@ Returns:
     assert np.shape(real_alt) == np.shape(simu_alt[0]) ,"Size are uncompatible. Error"
 
 
-    real_alt = np.random.rand(100,100)
-    simu_alt = [np.random.rand(100,100),np.random.rand(100,100),np.random.rand(100,100),np.random.rand(100,100)]
-
 
     somme_simus = np.zeros(np.shape(real_alt))
     somme_erreurs = np.zeros(np.shape(real_alt))
