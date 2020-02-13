@@ -124,7 +124,7 @@ for lineit in range(num_img):
         else:
             line[:,1] = np.array([box[1],round(random()*(box[3]-box[2]) + box[2])]) #return a x value, defined a y
 
-        dx = np.max(np.diff(line))
+        dx = np.int(np.max(np.diff(line)))
 
         x_pos = np.round(np.linspace(line[0,0],line[0,1],num =dx))
         y_pos = np.round(np.linspace(line[1,0],line[1,1],num =dx))
