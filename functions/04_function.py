@@ -8,6 +8,8 @@ import geone.imgplot as imgplt
 import geone.customcolors as ccol
 import geone.deesseinterface as dsi
 
+import geone.covModel as gcm
+import geone.customcolors as ccol
 
 ##########
 ##########
@@ -126,8 +128,9 @@ def create_ti(ti_arr, sx=2, sy=2, sz=1):
     return ti_Img
 
 
-##########
-##########
+####################
+#DeeSse
+####################
 
 def deeSse_run_ti(ti_Img, mask_ti, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
     '''
@@ -285,6 +288,47 @@ def deeSse_run_zone_pyr(ti_Img, mask_zone, hd_pts, n=12, t=0.05, f=0.50, nReal=1
     return sim
 
 
+####################
+#GRF
+####################
+
+def create_hd_grf(hd_df, position):
+    hd_df = hd_df.sample(frac=1)
+    hd_df = hd_df[hd_df['cell_x']!=position[1]]
+    hd_df = hd_df[hd_df['cell_y']!=position[3]]
+    
+    X = np.array([[float(x),float(y)] for x,y in zip(hd_df['cell_x'],hd_df['cell_y'])])
+    Y = np.array(hd_df['alt'])
+    
+    X,Y = remove_duplicate(X,Y)
+    return X,Y
+
+
+##########
+##########
+
+def create_grid(position):
+    nx,ny = int(position[1]-position[0]), int(position[3]-position[2])
+    sx,sy = 1.0, 1.0
+    ox,oy = float(position[0]), float(position[2])
+    
+    dimension = [nx,ny]
+    spacing   = [sx,sy]
+    origin    = [ox,oy]
+    
+    return dimension, spacing, origin
+
+
+##########
+##########
+
+def remove_duplicate(X,Y): 
+    X, position = np.unique(X,axis=0,return_index=True)
+    Y = Y[position]
+
+    return X,Y
+
+
 ##########
 ##########
 
@@ -303,3 +347,15 @@ def extract_simu_zone(simus,position):
         extZones.append(zone)
     
     return extZones
+
+
+##########
+##########
+
+
+
+
+
+
+
+
