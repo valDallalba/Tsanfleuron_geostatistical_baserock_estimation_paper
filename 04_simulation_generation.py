@@ -91,7 +91,7 @@ for name in data_name:
     trueMNT, position, hd_df, ti = read_data(dir_path, name)
     
     #Simu1 zone + TI  
-    mask_ti = create_mask_ti('ti_alt1_alti3d.pickle')
+    mask_ti = create_mask_ti('ti_alt2_alti3d.pickle')
     hd_pts  = create_hd(hd_df)
     ti_img  = create_ti(ti)
     #simu1   = deeSse_run_ti(ti_img, mask_ti, hd_pts, n=n, t=t, f=f, nReal = nbReal)
@@ -102,7 +102,7 @@ for name in data_name:
     extr2   = extract_simu_zone(simu2,position)
     
     #Simu3 zone
-    mask_zone = create_mask_zone('ti_alt1_alti3d.pickle',position)
+    mask_zone = create_mask_zone('ti_alt2_alti3d.pickle',position)
     #simu3     = deeSse_run_zone(ti_img, mask_zone, hd_pts, n=n, t=t, f=f, nReal = nbReal)
     #extr3     = extract_simu_zone(simu3,position) 
 

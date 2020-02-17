@@ -49,8 +49,8 @@ def create_mask_ti(ti_name):
     mask = img.Img(   nx=shape[3], ny=shape[2], nz=1,     
                       sx=ti.sx, sy=ti.sy, sz=ti.sz,
                       ox=0.0, oy=0.0, oz=0.0,
-                      nv=1, v=mask, varname=['alt'])    
-    
+                      nv=1, val=mask, varname=['alt'])    
+    print(mask.val.shape)
     return mask
 
 
@@ -77,7 +77,7 @@ def create_mask_zone(ti_name, position):
     mask = img.Img(   nx=shape[3], ny=shape[2], nz=1,     
                       sx=ti.sx, sy=ti.sy, sz=ti.sz,
                       ox=0.0, oy=0.0, oz=0.0,
-                      nv=1, v=mask, varname=['alt'])    
+                      nv=1, val=mask, varname=['alt'])    
     
     return mask
 
@@ -98,7 +98,7 @@ def create_hd(hd_df,sx=2,sy=2,ny=984):
     
     hd['Z'] = 0.5                         #create the Z infos
     hd      = hd[['X','Y','Z','alt']]  #reorganise the columns
-    hd_pts  = img.pandasToPointSet(hd) #create the point set
+    hd_pts  = pandasToPointSet(hd) #create the point set
     
     return hd_pts
 
@@ -122,7 +122,7 @@ def create_ti(ti_arr, sx=2, sy=2, sz=1):
     ti_Img = img.Img( nx=int(shape[1]), ny=int(shape[0]), nz=1,     
                       sx=sx, sy=sy, sz=sz,
                       ox=0.0, oy=0.0, oz=0.0,
-                      nv=1, v=ti.astype('float64'), varname=['alt']
+                      nv=1, val=ti.astype('float64'), varname=['alt']
             )
     
     return ti_Img
@@ -351,6 +351,35 @@ def extract_simu_zone(simus,position):
 
 ##########
 ##########
+
+def pandasToPointSet(df):
+    """
+    Convert pandas DataFrame into a PointSet object
+    :param df: (pandas.DataFrame) data frame to be converted
+    :return: PointSet:
+                       A PointSet object
+    """
+    import pandas as pd
+    
+    return img.PointSet(npt=len(df),
+            nv=len(df.columns),
+            val=df.values.transpose(),
+            varname=list(df.columns))
+
+##########
+##########
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
