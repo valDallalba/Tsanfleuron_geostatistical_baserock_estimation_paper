@@ -19,6 +19,10 @@ import geone.imgplot as imgplt
 import geone.customcolors as ccol
 import geone.deesseinterface as dsi
 
+import geone.covModel as gcm
+import geone.customcolors as ccol
+from geone import grf
+
 
 #Load Data
 exec(open('./functions/04_function.py').read())
@@ -41,7 +45,7 @@ else:
 
     
 #DeeSse parameters
-nbReal = int(input('How many MPS realisation by simulation set ? : '))
+nbReal = int(input('How many realisation by simulation set ? : '))
 para_b = str(input('Do you want to use the deeSse parameters set by default (n=12, t=0.005, f=0.5)? (True or False) : '))
 
 if para_b == 'False':
@@ -69,6 +73,18 @@ else:
         os.rmdir(save_path)
         os.mkdir(save_path)
 
+rangeM = int(input('Define the range of the model (default value recommended is 500) : '))
+sillM  = int(input('Define the sill of the model (default value recommended is 1400) : '))
+print('The default model is set to be spherical.')
+
+cov_model = gcm.CovModel2D(elem=[
+    ('spherical', {'w':rangeM, 'r':[sillM]}), # elementary contribution
+                       ], alpha=0, name='model-2D test')        
+
+cov_fun   = cov_model.func()
+vario_fun = cov_model.vario_func()
+
+
 #Simulation
 for name in data_name:
     #Load Data
@@ -94,8 +110,23 @@ for name in data_name:
     simu4   = deeSse_run_zone_pyr(ti_img, mask_zone, hd_pts, n=n, t=t, f=f, nReal = nbReal)
     extr4   = extract_simu_zone(simu4,position)
     
+    #GRF
+    X,Y = create_hd_grf(hd_df,position)
+    dimension, spacing, origin = create_grid(position)
+    
+    extensionMin = [grf.extension_min(r, n, s) for r, n, s in zip(cov_model.rxy(), dimension, spacing)]
+    simGRF       = grf.grf2D(cov_fun, dimension, spacing, origin, x=X, v=Y, 
+                   extensionMin=extensionMin, nreal=int(nbReal))
+    
+    krige, krige_std = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, 
+                                   extensionMin=extensionMin)
+        
+    
     with open(save_path+'/'+name[:-7]+'_simu.pickle','wb') as file:
-        pickle.dump([trueMNT,[extr2,extr4]],file, pickle.HIGHEST_PROTOCOL)
+        pickle.dump([trueMNT,[extr2,extr4,simGRF]],file, pickle.HIGHEST_PROTOCOL)
+        
+    with open(save_path+'/'+name[:-7]+'_krige.pickle','wb') as file:
+        pickle.dump([trueMNT,[krige, krige_std]],file, pickle.HIGHEST_PROTOCOL)
 
     
 print('------------ \n \n ')
