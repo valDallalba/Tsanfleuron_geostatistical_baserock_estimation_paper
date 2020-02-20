@@ -33,7 +33,6 @@ import pandas as pd
 #import matplotlib.pyplot as plt
 import os
 import georasters as gr
-import time 
 from random import seed
 seed(1)
 from random import random

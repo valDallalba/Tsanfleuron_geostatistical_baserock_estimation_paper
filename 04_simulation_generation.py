@@ -87,6 +87,10 @@ vario_fun = cov_model.vario_func()
 
 #Simulation
 for name in data_name:
+        #Load Data
+    trueMNT, position, hd_df, ti = read_data(dir_path, name)
+    ti[ti == np.min(np.min(ti)) ] = np.nan
+    
     #Load Data
     trueMNT, position, hd_df, ti = read_data(dir_path, name)
     
@@ -94,8 +98,7 @@ for name in data_name:
     mask_ti = create_mask_ti('ti_alt2_alti3d.pickle')
     hd_pts  = create_hd(hd_df)
     ti_img  = create_ti(ti)
-    #simu1   = deeSse_run_ti(ti_img, mask_ti, hd_pts, n=n, t=t, f=f, nReal = nbReal)
-    #extr1   = extract_simu_zone(simu1,position)
+    
     
     #Simu2 zone + TI + Pyramide
     simu2   = deeSse_run_ti_pyr(ti_img, mask_ti, hd_pts, n=n, t=t, f=f, nReal = nbReal)
@@ -103,8 +106,7 @@ for name in data_name:
     
     #Simu3 zone
     mask_zone = create_mask_zone('ti_alt2_alti3d.pickle',position)
-    #simu3     = deeSse_run_zone(ti_img, mask_zone, hd_pts, n=n, t=t, f=f, nReal = nbReal)
-    #extr3     = extract_simu_zone(simu3,position) 
+     
 
     #Simu4 zone + Pyramide
     simu4   = deeSse_run_zone_pyr(ti_img, mask_zone, hd_pts, n=n, t=t, f=f, nReal = nbReal)

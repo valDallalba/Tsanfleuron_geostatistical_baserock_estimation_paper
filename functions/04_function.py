@@ -44,7 +44,7 @@ def create_mask_ti(ti_name):
     mask_b       = np.isnan(ti.val[0,0]) 
     mask         = np.ones((shape[2],shape[3]))
     mask[mask_b] = 0
-
+    mask = np.flipud(mask)
     mask = mask[np.newaxis,np.newaxis,:,:]
     mask = img.Img(   nx=shape[3], ny=shape[2], nz=1,     
                       sx=ti.sx, sy=ti.sy, sz=ti.sz,
@@ -71,7 +71,7 @@ def create_mask_zone(ti_name, position):
     shape        = ti.val.shape
     mask         = np.zeros((shape[2],shape[3]))
     
-    mask[ti.ny-position[3]:ti.ny-position[2], position[0]:position[1]] = 1
+    mask[position[2]:position[3], position[0]:position[1]] = 1
 
     mask = mask[np.newaxis,np.newaxis,:,:]
     mask = img.Img(   nx=shape[3], ny=shape[2], nz=1,     
@@ -84,7 +84,7 @@ def create_mask_zone(ti_name, position):
 ##########
 ##########
 
-def create_hd(hd_df,sx=2,sy=2,ny=984):
+def create_hd(hd_df,sx=1,sy=1):
     '''
     Create hd point set based on pandas dataFrame.
     df : dataFrame.
@@ -94,7 +94,7 @@ def create_hd(hd_df,sx=2,sy=2,ny=984):
     hd = hd.drop(['X','Y'],axis='columns')              #drop the columns
     hd = hd.rename(columns={'cell_x':'X','cell_y':'Y'}) #rename the columns
     hd['X'] = hd['X']*sx
-    hd['Y'] = (ny-hd['Y'])*sy
+    hd['Y'] = hd['Y']*sy
     
     hd['Z'] = 0.5                         #create the Z infos
     hd      = hd[['X','Y','Z','alt']]  #reorganise the columns
@@ -106,7 +106,7 @@ def create_hd(hd_df,sx=2,sy=2,ny=984):
 ##########
 ##########
 
-def create_ti(ti_arr, sx=2, sy=2, sz=1):
+def create_ti(ti_arr, sx=1, sy=1, sz=1):
     '''
     Create the TI for the MPS simulation, the ti is the full Ti minus the extracted zone.
     ti : np array.
@@ -116,7 +116,6 @@ def create_ti(ti_arr, sx=2, sy=2, sz=1):
     ti = np.copy(ti_arr)
     ti[ti<-1] = np.nan #float(np.nan)
 
-    ti     = np.flipud(ti)
     ti     = ti[np.newaxis,np.newaxis,:,:]
 
     ti_Img = img.Img( nx=int(shape[1]), ny=int(shape[0]), nz=1,     
@@ -132,7 +131,7 @@ def create_ti(ti_arr, sx=2, sy=2, sz=1):
 #DeeSse
 ####################
 
-def deeSse_run_ti(ti_Img, mask_ti, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
+def deeSse_run_ti(ti_Img, mask_ti, hd_pts=None, n=12, t=0.05, f=0.50, nReal=1):
     '''
     DeeSse run, where the simulation use the TI as conditionning data.
     The MPS simulation complete the missing part of the TI.
@@ -150,7 +149,7 @@ def deeSse_run_ti(ti_Img, mask_ti, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
     nv=1, varname='alt',                  # number of variable(s), name of the variable(s)
     nTI=1, TI=ti_Img,                     # number of TI(s), TI (class dsi.Img)
     mask=mask_ti.val,                 # mask value
-    dataPointSet=[hd_pts,hdpt2],      # hard data
+    dataPointSet=[hdpt2,hd_pts]if hd_pts!=None else [hdpt2],      # hard data
     relativeDistanceFlag=True,
     distanceType=1,           # distance type: proportion of mismatching nodes (categorical var., default)
     nneighboringNode=n,       # max. number of neighbors (for the patterns)
@@ -294,6 +293,7 @@ def deeSse_run_zone_pyr(ti_Img, mask_zone, hd_pts, n=12, t=0.05, f=0.50, nReal=1
 
 def create_hd_grf(hd_df, position):
     hd_df = hd_df.sample(frac=1)
+    
     hd_df = hd_df[hd_df['cell_x']!=position[1]]
     hd_df = hd_df[hd_df['cell_y']!=position[3]]
     
@@ -342,8 +342,7 @@ def extract_simu_zone(simus,position):
     ny = simus[0].ny
     
     for simu in simus:
-        zone = simu.val[0,0,ny-position[3]: ny-position[2], position[0]:position[1]]
-        zone = np.flipud(zone)
+        zone = simu.val[0,0,position[2]:position[3], position[0]:position[1]]
         extZones.append(zone)
     
     return extZones
