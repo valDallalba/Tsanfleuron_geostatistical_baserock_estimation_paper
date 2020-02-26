@@ -42,6 +42,7 @@ from tkinter import filedialog
 
 # Intro :
 # We define here the parameters, and the training image in which we will cut the data.
+print('Select the TI to sample (.tiff format) : ')
 root = tk.Tk()
 root.withdraw()
 
@@ -58,16 +59,16 @@ else:
     quit()
 
 print('------------ \n \n ')
-numX = int(input("Dimension of the cutted image in X [m] :") )
+numX = int(input("Dimension of the cutted image in X [m] : ") )
 print('------------ \n \n ')
-numY = int(input("Dimension of the cutted image in Y [m] :") )
+numY = int(input("Dimension of the cutted image in Y [m] : ") )
 
 #Load the data
 size_img = np.array([numX,numY])
 print('------------ \n \n ')
-number_of_aquisition_lines = int(input("Number of Fake Aquisition lines per image :") )
+number_of_aquisition_lines = int(input("Number of Fake Aquisition lines per image : ") )
 print('------------ \n \n ')
-define_border = bool(input("Define border of the image as hard data ? True of False") )
+define_border = bool(input("Define border of the image as hard data ? (True of False) : ") )
 error = 2
 print('------------ \n \n ')
 num_img = int(input("Number of simulations :") )
