@@ -131,7 +131,7 @@ def deeSse_run_ti(ti_Img, mask_ti, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
     ox=ti_Img.ox, oy=ti_Img.oy, oz=ti_Img.oz,     # origin of the simulation grid (here are the default values)
     nv=1, varname='alt',                  # number of variable(s), name of the variable(s)
     nTI=1, TI=ti_Img,                     # number of TI(s), TI (class dsi.Img)
-    mask=mask_ti.val,                 # mask value
+    mask=mask_ti,                 # mask value
     dataPointSet=[hd_pts,hdpt2],      # hard data
     relativeDistanceFlag=True,
     distanceType=1,           # distance type: proportion of mismatching nodes (categorical var., default)
@@ -174,7 +174,7 @@ def deeSse_run_zone(ti_Img, mask_zone, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
     ox=ti_Img.ox, oy=ti_Img.oy, oz=ti_Img.oz,     # origin of the simulation grid (here are the default values)
     nv=1, varname='alt',                  # number of variable(s), name of the variable(s)
     nTI=1, TI=ti_Img,                     # number of TI(s), TI (class dsi.Img)
-    mask=mask_zone.val,           # mask value
+    mask=mask_zone,           # mask value
     dataPointSet=[hd_pts],        # hard data
     relativeDistanceFlag=True,
     distanceType=1,           # distance type: proportion of mismatching nodes (categorical var., default)
