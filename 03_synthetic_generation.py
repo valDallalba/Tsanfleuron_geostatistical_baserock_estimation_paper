@@ -106,6 +106,8 @@ for lineit in range(num_img):
         res = np.all(mask_cut)
         #a = np.ones(raster_cut.shape)*100000000
         
+        mask = np.zeros(data_DEM.shape)
+        mask[rdm_Y:(rdm_Y+int(size_img_c[1])),rdm_X:int((rdm_X+size_img_c[0]))] = 1
             
     hard_data = pd.DataFrame()
     line = np.zeros([2,2])
@@ -178,7 +180,7 @@ for lineit in range(num_img):
         os.mkdir(save_path)
 
     with open(save_path + '/' + synthe_name + str(lineit) + '.pickle', 'wb') as f:  # Python 3: open(..., 'wb')
-        pickle.dump([raster_cut.data, box, hard_data,New_TI], f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump([raster_cut.data, box, hard_data,New_TI,[mask,mask_where_nodata]], f, pickle.HIGHEST_PROTOCOL)
         f.close()
 
 print('------------ \n \n ')
