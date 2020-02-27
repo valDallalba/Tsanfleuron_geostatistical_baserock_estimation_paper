@@ -62,20 +62,36 @@ else:
     n, t, f = 12, 0.005, 0.5
     
 #Save the data
-save_path = './simulation_output'
+save_path_sim = './simulation_output'
 
-if not(os.path.exists(save_path)):
-        os.mkdir(save_path)
+if not(os.path.exists(save_path_sim)):
+        os.mkdir(save_path_sim)
 else: 
-    for root, dirs, files in os.walk(save_path, topdown=False):
+    for root, dirs, files in os.walk(save_path_sim, topdown=False):
         for name in files:
             os.remove(os.path.join(root, name))
         for name in dirs:
             os.rmdir(os.path.join(root, name))
             
-        os.rmdir(save_path)
-        os.mkdir(save_path)
+        os.rmdir(save_path_sim)
+        os.mkdir(save_path_sim)
 
+        
+save_path_kri = './simulation_output_krig'
+
+if not(os.path.exists(save_path_kri)):
+        os.mkdir(save_path_kri)
+else: 
+    for root, dirs, files in os.walk(save_path_kri, topdown=False):
+        for name in files:
+            os.remove(os.path.join(root, name))
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))
+            
+        os.rmdir(save_path_kri)
+        os.mkdir(save_path_kri)
+        
+        
 rangeM = int(input('Define the range of the model (default value recommended is 500) : '))
 sillM  = int(input('Define the sill of the model (default value recommended is 1400) : '))
 print('The default model is set to be spherical.')
@@ -122,10 +138,10 @@ for name in data_name:
                                    extensionMin=extensionMin)
         
     
-    with open(save_path+'/'+name[:-7]+'_simu.pickle','wb') as file:
+    with open(save_path_sim+'/'+name[:-7]+'_simu.pickle','wb') as file:
         pickle.dump([trueMNT,[extr2,extr4,simGRF]],file, pickle.HIGHEST_PROTOCOL)
         
-    with open(save_path+'/'+name[:-7]+'_krige.pickle','wb') as file:
+    with open(save_path_kri+'/'+name[:-7]+'_krige.pickle','wb') as file:
         pickle.dump([trueMNT,[krige, krige_std]],file, pickle.HIGHEST_PROTOCOL)
 
     
