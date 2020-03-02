@@ -107,7 +107,7 @@ vario_fun = cov_model.vario_func()
 #Simulation
 for name in data_name:
     #Load Data
-    trueMNT, position, hd_df, ti, mask = read_data(dir_path, name)
+    trueMNT, position, hd_df, ti, mask, ref = read_data(dir_path, name)
     ti[ti == np.min(np.min(ti)) ] = np.nan
     
     #Simu1 zone + TI  
@@ -134,15 +134,17 @@ for name in data_name:
     simGRF       = grf.grf2D(cov_fun, dimension, spacing, origin, x=X, v=Y, 
                    extensionMin=extensionMin, nreal=int(nbReal))
     
-    krige, krige_std = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, 
-                                   extensionMin=extensionMin)
-        
+    if mask[0].shape[1] < 2000:
+        krige, krige_std = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin)
+    else:
+        krige = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin, computeKrigSD=False)
+        krige_std = None
     
     with open(save_path_sim+'/'+name[:-7]+'_simu.pickle','wb') as file:
-        pickle.dump([trueMNT,[extr2,extr4,simGRF]],file, pickle.HIGHEST_PROTOCOL)
+        pickle.dump([trueMNT,[extr2,extr4,simGRF],mask[0], ref],file, pickle.HIGHEST_PROTOCOL)
         
     with open(save_path_kri+'/'+name[:-7]+'_krige.pickle','wb') as file:
-        pickle.dump([trueMNT,[krige, krige_std]],file, pickle.HIGHEST_PROTOCOL)
+        pickle.dump([trueMNT,[krige, krige_std],mask[0], ref],file, pickle.HIGHEST_PROTOCOL)
 
     
 print('------------ \n \n ')

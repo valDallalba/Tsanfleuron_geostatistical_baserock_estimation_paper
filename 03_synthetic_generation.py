@@ -181,7 +181,7 @@ for lineit in range(num_img):
         os.mkdir(save_path)
 
     with open(save_path + '/' + synthe_name + str(lineit) + '.pickle', 'wb') as f:  # Python 3: open(..., 'wb')
-        pickle.dump([raster_cut.data, box, hard_data,New_TI,[mask,mask_where_nodata]], f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump([raster_cut.data, box, hard_data,New_TI,[mask,mask_where_nodata],None], f, pickle.HIGHEST_PROTOCOL)
         f.close()
 
 print('------------ \n \n ')
