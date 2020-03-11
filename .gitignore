@@ -3,4 +3,7 @@ real_data/
 saved_sim/
 simulation_output/
 simulation_output_krig/
+simulation_output_tsanfleuron/
+simulation_output_krig_tsanfleuron/
+real_data/
 .ipynb_checkpoints/

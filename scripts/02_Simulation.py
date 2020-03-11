@@ -25,8 +25,8 @@ from geone import grf
 
 
 #Load Data
-exec(open('./functions/02_simulation_functions.py').read())
-exec(open('./functions/02_kriging_functions.py').read())
+exec(open('../functions/02_simulation_functions.py').read())
+exec(open('../functions/02_kriging_functions.py').read())
 
 print('Select the folder that contain the input file (pickle) : ')
 root = tk.Tk()
@@ -110,19 +110,15 @@ for name in data_name:
     trueMNT, position, hd_df, ti, mask, ref = read_data(dir_path, name)
     ti[ti == np.min(np.min(ti)) ] = np.nan
     
-    #Simu1 zone + TI  
+    #Simu1 zone + TI + Pyramide
     mask_ti = mask[1]
     hd_pts  = create_hd(hd_df)
     ti_img  = create_ti(ti)
-    
-    #Simu2 zone + TI + Pyramide
     simu2   = deeSse_run_ti(ti_img, mask_ti, hd_pts, n=n, t=t, f=f, nReal = nbReal)
     extr2   = extract_simu_zone(simu2,position)
     
-    #Simu3 zone
+    #Simu2 zone + Pyramide
     mask_zone = mask[0]     
-
-    #Simu4 zone + Pyramide
     simu4   = deeSse_run_zone(ti_img, mask_zone, hd_pts, n=n, t=t, f=f, nReal = nbReal)
     extr4   = extract_simu_zone(simu4,position)
     
