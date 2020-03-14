@@ -5,5 +5,7 @@ simulation_output/
 simulation_output_krig/
 simulation_output_tsanfleuron/
 simulation_output_krig_tsanfleuron/
+real_data_cyprien/
+real_data_alexis/
 real_data/
 .ipynb_checkpoints/

@@ -62,7 +62,7 @@ else:
     n, t, f = 12, 0.005, 0.5
     
 #Save the data
-save_path_sim = './simulation_output'
+save_path_sim = '../simulation_output'
 
 if not(os.path.exists(save_path_sim)):
         os.mkdir(save_path_sim)
@@ -77,7 +77,7 @@ else:
         os.mkdir(save_path_sim)
 
         
-save_path_kri = './simulation_output_krig'
+save_path_kri = '../simulation_output_krig'
 
 if not(os.path.exists(save_path_kri)):
         os.mkdir(save_path_kri)
@@ -91,17 +91,19 @@ else:
         os.rmdir(save_path_kri)
         os.mkdir(save_path_kri)
         
-        
-rangeM = int(input('Define the range of the model (default value recommended is 500) : '))
-sillM  = int(input('Define the sill of the model (default value recommended is 1400) : '))
-print('The default model is set to be spherical.')
+test_krig = str(input('Do you want to to the GRF and Kriging estimation ? ( False/True) '))
+                 
+if test_krig == True:
+    rangeM = int(input('Define the range of the model (default value recommended is 500) : '))
+    sillM  = int(input('Define the sill of the model (default value recommended is 1400) : '))
+    print('The default model is set to be spherical.')
 
-cov_model = gcm.CovModel2D(elem=[
-    ('spherical', {'w':rangeM, 'r':[sillM]}), # elementary contribution
-                       ], alpha=0, name='model-2D test')        
+    cov_model = gcm.CovModel2D(elem=[
+        ('spherical', {'w':rangeM, 'r':[sillM]}), # elementary contribution
+                           ], alpha=0, name='model-2D test')        
 
-cov_fun   = cov_model.func()
-vario_fun = cov_model.vario_func()
+    cov_fun   = cov_model.func()
+    vario_fun = cov_model.vario_func()
 
 
 #Simulation
@@ -111,37 +113,41 @@ for name in data_name:
     ti[ti == np.min(np.min(ti)) ] = np.nan
     
     #Simu1 zone + TI + Pyramide
-    mask_ti = mask[1]
+    mask_ti = mask[0]
     hd_pts  = create_hd(hd_df)
     ti_img  = create_ti(ti)
     simu2   = deeSse_run_ti(ti_img, mask_ti, hd_pts, n=n, t=t, f=f, nReal = nbReal)
     extr2   = extract_simu_zone(simu2,position)
     
     #Simu2 zone + Pyramide
-    mask_zone = mask[0]     
+    mask_zone = mask[1]     
     simu4   = deeSse_run_zone(ti_img, mask_zone, hd_pts, n=n, t=t, f=f, nReal = nbReal)
     extr4   = extract_simu_zone(simu4,position)
     
-    #GRF
-    X,Y = create_hd_grf(hd_df,position)
-    dimension, spacing, origin = create_grid(position)
+    if test_krig == True:
+        #GRF
+        X,Y = create_hd_grf(hd_df,position)
+        dimension, spacing, origin = create_grid(position)
     
-    extensionMin = [grf.extension_min(r, n, s) for r, n, s in zip(cov_model.rxy(), dimension, spacing)]
-    simGRF       = grf.grf2D(cov_fun, dimension, spacing, origin, x=X, v=Y, 
+        extensionMin = [grf.extension_min(r, n, s) for r, n, s in zip(cov_model.rxy(), dimension, spacing)]
+        simGRF       = grf.grf2D(cov_fun, dimension, spacing, origin, x=X, v=Y, 
                    extensionMin=extensionMin, nreal=int(nbReal))
     
-    if mask[0].shape[1] < 2000:
-        krige, krige_std = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin)
+        if mask[0].shape[1] < 2000:
+            krige, krige_std = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin)
+        else:
+            krige = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin, computeKrigSD=False)
+            krige_std = None
+                 
+        with open(save_path_kri+'/'+name[:-7]+'_krige.pickle','wb') as file:
+            pickle.dump([trueMNT,[krige, krige_std],mask[1], ref],file, pickle.HIGHEST_PROTOCOL)
     else:
-        krige = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin, computeKrigSD=False)
-        krige_std = None
-    
+        simGRF = None
+                 
     with open(save_path_sim+'/'+name[:-7]+'_simu.pickle','wb') as file:
-        pickle.dump([trueMNT,[extr2,extr4,simGRF],mask[0], ref],file, pickle.HIGHEST_PROTOCOL)
+        pickle.dump([trueMNT,[extr2,extr4,simGRF],mask[1], ref],file, pickle.HIGHEST_PROTOCOL)
         
-    with open(save_path_kri+'/'+name[:-7]+'_krige.pickle','wb') as file:
-        pickle.dump([trueMNT,[krige, krige_std],mask[0], ref],file, pickle.HIGHEST_PROTOCOL)
-
+    
     
 print('------------ \n \n ')
 print('Success !')
