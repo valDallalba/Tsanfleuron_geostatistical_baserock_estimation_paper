@@ -1,5 +1,6 @@
 generated_data/
-real_data/
+real_data*/
+simulation_*/
 saved_sim/
-simulation_output/
-simulation_output_krig/
+.ipynb*
+
