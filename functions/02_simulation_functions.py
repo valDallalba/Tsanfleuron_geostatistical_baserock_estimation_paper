@@ -92,8 +92,8 @@ def create_ti(ti_arr, sx=1, sy=1, sz=1):
     ti : np array.
     '''
     
-    shape  = ti_arr.shape
-    ti = np.copy(ti_arr)
+    shape     = ti_arr.shape
+    ti        = np.copy(ti_arr)
     ti[ti<-1] = np.nan #float(np.nan)
 
     ti     = ti[np.newaxis,np.newaxis,:,:]

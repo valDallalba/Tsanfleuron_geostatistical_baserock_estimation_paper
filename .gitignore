@@ -1,6 +1,8 @@
-generated_data/
-real_data*/
-simulation_*/
+generated_data*
 saved_sim/
-.ipynb*
-
+simulation_output*
+real_data_cyprien/
+real_data_alexis/
+real_data/
+.ipynb_checkpoints/
+Brouillon*

@@ -1,7 +1,31 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Generate test images and fake aquisition from the mnt data
+import pickle
+import numpy as np
+import pandas as pd
+import os
+import georasters as gr
+from random import seed
+seed(1)
+from random import random
+
+import tkinter as tk
+from tkinter import filedialog
+
+
+###########################################################
+# Generate test images and fake aquisition from a mnt tif.
+# Create to test the MPS parameters and compare the different 
+# methods of simulation/estimation on the Tsanfleuron Glacier
+# project.
+# Alexis Neven 02/2020
+###########################################################
+
+
+#############
+#Progress bar
+#############
 class ProgressBar:
     '''
     Progress bar
@@ -27,22 +51,12 @@ class ProgressBar:
         out = '\r %20s [%s%s] %3d %%' % (self.title, '=' * bar, ' ' * (self.maxbar - bar), perc)
         sys.stdout.write(out)
 
-import pickle
-import numpy as np
-import pandas as pd
-#import matplotlib.pyplot as plt
-import os
-import georasters as gr
-from random import seed
-seed(1)
-from random import random
+        
+###########
+# Load Data
+###########
 
-import tkinter as tk
-from tkinter import filedialog
-
-# Intro :
-# We define here the parameters, and the training image in which we will cut the data.
-print('Select the TI to sample (.tiff format) : ')
+print('Select the TI to sample (.tiff format with no_value as a numerical values) : ')
 root = tk.Tk()
 root.withdraw()
 
@@ -58,27 +72,32 @@ else:
     print('error, impossible to import image')
     quit()
 
+    
+##########
+#Extraction parameters
+##########
+
 print('------------ \n \n ')
 numX = int(input("Dimension of the cutted image in X [m] : ") )
 print('------------ \n \n ')
 numY = int(input("Dimension of the cutted image in Y [m] : ") )
-
-#Load the data
 size_img = np.array([numX,numY])
+
 print('------------ \n \n ')
 number_of_aquisition_lines = int(input("Number of Fake Aquisition lines per image : ") )
 print('------------ \n \n ')
 define_border = bool(input("Define border of the image as hard data ? (True of False) : ") )
-error = 2
 print('------------ \n \n ')
 num_img = int(input("Number of simulations :") )
 
-
-
 print('Sizes Infos :')
-
 print(data_DEM.geot)
 print(data_DEM.shape)
+
+
+##########
+#Create the mask 
+##########
 x_v = np.array(range(data_DEM.shape[1]))*2 + data_DEM.geot[3]
 y_v = np.array(range(data_DEM.shape[0]))*2 + data_DEM.geot[0]
 Y_dem, X_dem = np.meshgrid(x_v,y_v)
@@ -86,48 +105,68 @@ Y_dem, X_dem = np.meshgrid(x_v,y_v)
 mask_where_nodata = data_DEM.raster != np.min(data_DEM.raster)
 
 
+#########
+#Generation of the data
+#########
+
 print('------------ \n \n ')
 Bar = ProgressBar(num_img, 60, 'Generation of the images')
 
 for lineit in range(num_img):
-
+     
+    #update prograss bar
     Bar.update(lineit)
-
+    
+    #Extracted zone
+    #(loop until the extracted zone does not conntains any no_data)
     res = False
     while res == False:
+        
+        #random location on the TI
         size_img_c = (np.round(size_img / data_DEM.geot[1]))
-        rdm_X = int(round(random()*(data_DEM.shape[1] - size_img_c[0])))
-        rdm_Y = int(round(random()*(data_DEM.shape[0] - size_img_c[1])))
-
-        box = [rdm_X, int(rdm_X+size_img_c[0]),rdm_Y,int(rdm_Y+size_img_c[1])]
-        mask_cut = mask_where_nodata[rdm_Y:(rdm_Y+int(size_img_c[1])),rdm_X:int((rdm_X+size_img_c[0]))]
+        rdm_X      = int(round(random()*(data_DEM.shape[1] - size_img_c[0])))
+        rdm_Y      = int(round(random()*(data_DEM.shape[0] - size_img_c[1])))
+        
+        #cut the TI on the location and to its define size
+        box        = [rdm_X, int(rdm_X+size_img_c[0]),rdm_Y,int(rdm_Y+size_img_c[1])] #xmin, xmax, ymin, ymax
+        mask_cut   = mask_where_nodata[rdm_Y:(rdm_Y+int(size_img_c[1])),rdm_X:int((rdm_X+size_img_c[0]))]
         raster_cut = data_DEM.raster[rdm_Y:(rdm_Y+int(size_img_c[1])),rdm_X:int((rdm_X+size_img_c[0]))]
+        
+        #set as no_value the cutted part of the TI
         New_TI = np.array(data_DEM.raster)
         New_TI[rdm_Y:(rdm_Y+int(size_img_c[1])),rdm_X:int((rdm_X+size_img_c[0]))] = data_DEM.nodata_value
-        res = np.all(mask_cut)
-        #a = np.ones(raster_cut.shape)*100000000
         
+        #test if all the selected cutted values are define
+        res    = np.all(mask_cut)
+        
+        #create a geone mask for the simulation (0=outside, 1=inside)
         mask = np.zeros(data_DEM.shape)
         mask[rdm_Y:(rdm_Y+int(size_img_c[1])),rdm_X:int((rdm_X+size_img_c[0]))] = 1
+        
             
-    hard_data = pd.DataFrame()
-    line = np.zeros([2,2])
-
+    #Fake Hard data
+    hd_df     = pd.DataFrame()
+    line      = np.zeros((2,2))
+    
+    #Fake lines
     for i in range(number_of_aquisition_lines):
 
         top = [round(random()),round(random())]
         if top[0] == 1:  #Vertical start
-            line[:,0] = np.array([round(random()*(box[1]-box[0]) + box[0]),box[2]])#return a x value, defined a y
-        else:
-            line[:,0] = np.array([box[0],round(random()*(box[3]-box[2]) + box[2])]) #return a x value, defined a y
+            #return a x value, defined a y
+            line[:,0] = np.array([round(random()*(box[1]-box[0]) + box[0]),box[2]])
+        else: 
+            #return a x value, defined a y
+            line[:,0] = np.array([box[0],round(random()*(box[3]-box[2]) + box[2])])
 
         if top[1] == 1:
-            line[:,1] = np.array([round(random()*(box[1]-box[0]) + box[0]),box[3]]) #return a x value, defined a y
-        else:
-            line[:,1] = np.array([box[1],round(random()*(box[3]-box[2]) + box[2])]) #return a x value, defined a y
+            #return a x value, defined a y
+            line[:,1] = np.array([round(random()*(box[1]-box[0]) + box[0]),box[3]]) 
+        else: 
+            #return a x value, defined a y
+            line[:,1] = np.array([box[1],round(random()*(box[3]-box[2]) + box[2])])
 
-        dx = np.int(np.max(np.diff(line)))
-
+        dx    = np.int(np.max(np.diff(line)))
         x_pos = np.round(np.linspace(line[0,0],line[0,1],num =dx))
         y_pos = np.round(np.linspace(line[1,0],line[1,1],num =dx))
 
@@ -135,41 +174,40 @@ for lineit in range(num_img):
         pos_index = pd.DataFrame(d)
         pos_index["cell_x"] = pos_index["cell_x"].astype(int)
         pos_index["cell_y"] = pos_index["cell_y"].astype(int)
-        pos_index['alt'] = data_DEM.raster[pos_index["cell_y"],pos_index["cell_x"]]
-        pos_index['X'] = X_dem[pos_index["cell_y"],pos_index["cell_x"]]
-        pos_index['Y'] = Y_dem[pos_index["cell_y"],pos_index["cell_x"]]
+        pos_index['alt']    = data_DEM.raster[pos_index["cell_y"],pos_index["cell_x"]]
+        pos_index['X']      = X_dem[pos_index["cell_y"],pos_index["cell_x"]]
+        pos_index['Y']      = Y_dem[pos_index["cell_y"],pos_index["cell_x"]]
 
-        hard_data = hard_data.append(pos_index, ignore_index = True)
+        hd_df = hd_df.append(pos_index, ignore_index = True)
 
-
-
+    #Fake border
     if define_border:
         x_cells = np.array(range(box[0],box[1]))
         y_cells = np.array(range(box[2],box[3]))
         
-        x_pos = np.append(np.tile(x_cells,2),np.tile(x_cells[0],y_cells.size))#,)
-        y_pos = np.append(np.tile(y_cells[0],x_cells.size),np.tile(y_cells[-1],x_cells.size))#)
+        x_pos = np.append(np.tile(x_cells,2),np.tile(x_cells[0],y_cells.size))
+        y_pos = np.append(np.tile(y_cells[0],x_cells.size),np.tile(y_cells[-1],x_cells.size))
         
         x_pos = np.append(x_pos,np.tile(x_cells[-1],y_cells.size))
         y_pos = np.append(y_pos,np.tile(y_cells,2))
-        #x_pos = x_pos.append()
         
         d = {'cell_x': x_pos, 'cell_y': y_pos}
         pos_index = pd.DataFrame(d)
         pos_index["cell_x"] = pos_index["cell_x"].astype(int)
         pos_index["cell_y"] = pos_index["cell_y"].astype(int)
+        pos_index['alt']    = data_DEM.raster[pos_index["cell_y"],pos_index["cell_x"]]
+        pos_index['X']      = X_dem[pos_index["cell_y"],pos_index["cell_x"]]
+        pos_index['Y']      = Y_dem[pos_index["cell_y"],pos_index["cell_x"]]
         
-        pos_index['alt'] = data_DEM.raster[pos_index["cell_y"],pos_index["cell_x"]]
-        pos_index['X'] = X_dem[pos_index["cell_y"],pos_index["cell_x"]]
-        pos_index['Y'] = Y_dem[pos_index["cell_y"],pos_index["cell_x"]]
-        
-        hard_data = hard_data.append(pos_index, ignore_index = True)
+        hd_df = hd_df.append(pos_index, ignore_index = True)
 
-
+    #Save synthetic output
     synthe_name = 'realisation' 
-    save_path = './generated_data'
+    save_path   = '../generated_data'
+    
     if not(os.path.exists(save_path)):
         os.mkdir(save_path)
+        
     elif lineit == 0:
         for root, dirs, files in os.walk(save_path, topdown=False):
             for name in files:
@@ -179,11 +217,23 @@ for lineit in range(num_img):
             
         os.rmdir(save_path)
         os.mkdir(save_path)
-
-    with open(save_path + '/' + synthe_name + str(lineit) + '.pickle', 'wb') as f:  # Python 3: open(..., 'wb')
-        pickle.dump([raster_cut.data, box, hard_data,New_TI,[mask,mask_where_nodata],None], f, pickle.HIGHEST_PROTOCOL)
-        f.close()
-
+        
+    #Output data    
+    trueMNT  = np.copy(raster_cut.data)
+    position = np.copy(box)
+    ti       = np.copy(New_TI)
+    ti[ti==np.nanmin(ti)] = np.nan
+    mask_box    = np.copy(mask)
+    mask_box_ti = np.copy(data_DEM.raster.data)
+    mask_box_ti[mask_box_ti == np.nanmin(mask_box_ti)] = 0
+    mask_box_ti[mask_box_ti > np.nanmin(mask_box_ti)]  = 1    
+    
+    with open(save_path + '/' + synthe_name + str(lineit) + '.pickle', 'wb') as f:
+        pickle.dump([trueMNT, position, hd_df, ti, mask_box, mask_box_ti], f, pickle.HIGHEST_PROTOCOL)
+        
+        
+        
+        
 print('------------ \n \n ')
 print('Success !')
 print('\n \n ------------  ')

@@ -13,7 +13,7 @@ def volume_calculation(top_alt,bottom_alt):
     return vol
 
     
-def indice_calculation(real_alt,simu_alt,sim_type):
+def indice_calculationA(real_alt,simu_alt,sim_type):
     '''Calculate the quality indices.
 
     Input :
@@ -91,7 +91,78 @@ def indice_calculation(real_alt,simu_alt,sim_type):
         I1= np.mean(moyenne_err[standard_dev != 0])
         I2= np.mean(moyenne_err_abs[standard_dev != 0])
         I3 = np.sum(moyenne_err3[standard_dev != 0]/(N))
-
-        pro = [I1, I2, I3, moyenne_simus, standard_dev,volume]
-
+        volumeReal = volume_calculation(real_alt+50,real_alt)
+        
+        pro = [I1, I2, I3, moyenne_simus, standard_dev, volume, volumeReal]
+        
     return pro
+
+
+def indice_calculationV(real_alt, simu_alt, sim_type):
+    '''Calculate the quality indices.
+
+    Input :
+            - NP.ARRAY of the real altitudes
+            - LIST of N NP.ARRAY of the N simulated altitudes
+            - STR defining the data type (MPS or KRIG). 'mps' or 'krig'
+    Returns:
+        A list containing 5 indices.
+        I1 : mean of the error.
+        I2 : mean of the absolute Error
+        I3 : np.sum(moyenne_err3/(nbPoints*nbSimulations))
+        I4 : np array of the per point average
+        I5 : np array of the per point standart deviation
+
+        note : The conditioning points are removed for the calculus of I1, I2, and I3
+    '''
+
+
+    assert len(real_alt) != 0,"List of real altitude is empty. Error"
+    assert len(simu_alt) != 0,"List of simu altitude is empty. Error"
+    assert np.shape(real_alt) == np.shape(simu_alt[0]) ,"Size are uncompatible. Error"
+
+    
+    if sim_type == 'krig':
+
+        standard_dev = simu_alt[1]
+        simu_alt     = simu_alt[0]        
+        moyenne_err3 =  np.power(np.divide((simu_alt-real_alt),standard_dev),2)      
+        
+        st0 = standard_dev != 0
+        N   = np.size(standard_dev[st0]) * 1
+        I1  = np.mean((simu_alt[st0] - real_alt[st0]))
+        I2  = np.mean(np.abs(simu_alt[st0] - real_alt[st0]))
+        I3  = np.nansum(moyenne_err3[st0]/(N))
+
+        volume     = volume_calculation(real_alt+50,simu_alt)
+        volumeReal = volume_calculation(real_alt+50,real_alt)
+
+        indices_out = [I1, I2, I3, simu_alt, standard_dev, volume, volumeReal]
+        
+
+    if sim_type == 'mps':
+        
+        moyenne_simus = np.mean(simu_alt, axis=0)
+        standard_dev  = np.std(simu_alt, axis=0)
+        
+        volume     = [volume_calculation(real_alt+50,simu) for simu in simu_alt]
+        volumeReal = volume_calculation(real_alt+50,real_alt)
+        
+        somme_simus        = np.nansum(simu_alt, axis=0)
+        somme_erreurs      = np.nansum(simu_alt-real_alt, axis=0)
+        sommes_erreurs_abs = np.nansum(np.abs(simu_alt-real_alt), axis=0)
+        
+        moyenne_err3    = np.nansum((np.power((simu_alt-real_alt)/standard_dev,2)), axis=0)    
+        moyenne_err     = np.divide(somme_erreurs,len(simu_alt))
+        moyenne_err_abs = np.divide(sommes_erreurs_abs,len(simu_alt))
+
+        st0 = standard_dev != 0
+        N   = np.size(standard_dev[st0]) * len(simu_alt)
+        I1  = np.mean(moyenne_err[st0])
+        I2  = np.mean(moyenne_err_abs[st0])
+        I3  = np.sum(moyenne_err3[st0]/(N))
+        volumeReal = volume_calculation(real_alt+50,real_alt)
+        
+        indices_out = [I1, I2, I3, moyenne_simus, standard_dev, volume, volumeReal]
+        
+    return indices_out
