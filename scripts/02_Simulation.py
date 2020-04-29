@@ -143,7 +143,7 @@ if test_krig == 'True' or test_GRF == 'True':
 for name in data_name:
     
     #Load Data
-    trueMNT, position, hd_df, ti, mask_box, mask_box_ti = read_data(file_path, name)
+    trueMNT, trend_cut, position, hd_df, ti, mask_box, mask_box_ti = read_data(file_path, name)
     
     #Clear the ti
     ti[ti == np.min(ti) ] = np.nan
@@ -174,7 +174,7 @@ for name in data_name:
     #Save simulation outputs
     if test_deesse == 'True' or test_GRF == 'True':             
             with open(save_path_sim+'/'+name[:-7]+'_simu.pickle','wb') as file:
-                pickle.dump([trueMNT, [extrMPS, simuGRF], mask_box_ti, position], file, pickle.HIGHEST_PROTOCOL)
+                pickle.dump([trueMNT, trend_cut, [extrMPS, simuGRF], mask_box_ti, position], file, pickle.HIGHEST_PROTOCOL)
 
     #Kriging run
     if test_krig == 'True':
@@ -183,8 +183,9 @@ for name in data_name:
     
         extensionMin = [grf.extension_min(r, n, s) for r, n, s in zip(cov_model.rxy(), dimension, spacing)]
         
+        std_test=True
         #We recommend to not krig on the whole glacier but use the mean of GRF simulation
-        if mask_box.shape[1] < 2000:
+        if std_test==True:
             krige, krige_std = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin)
         else:
             krige = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin, computeKrigSD=False)
@@ -192,7 +193,7 @@ for name in data_name:
             
         #Save kriging output         
         with open(save_path_kri+'/'+name[:-7]+'_krige.pickle','wb') as file:
-            pickle.dump([trueMNT, [krige, krige_std], mask_box_ti, position],file, pickle.HIGHEST_PROTOCOL)
+            pickle.dump([trueMNT, trend_cut, [krige, krige_std], mask_box_ti, position],file, pickle.HIGHEST_PROTOCOL)
 
     
     

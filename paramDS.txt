@@ -1,0 +1,13 @@
+DS_test, GRF_test, KRIG_test, nbReal, n, t, f, range, sill
+True, False, False, 24, 6, 0.01, 0.1, None, None
+True, False, False, 24, 6, 0.01, 0.5, None, None
+True, False, False, 24, 6, 0.005, 0.1, None, None
+True, False, False, 24, 6, 0.005, 0.5, None, None
+True, False, False, 24, 12, 0.01, 0.1, None, None
+True, False, False, 24, 12, 0.01, 0.5, None, None
+True, False, False, 24, 12, 0.005, 0.1, None, None
+True, False, False, 24, 12, 0.005, 0.5, None, None
+True, False, False, 24, 24, 0.01, 0.1, None, None
+True, False, False, 24, 24, 0.01, 0.5, None, None
+True, False, False, 24, 24, 0.005, 0.1, None, None
+True, False, False, 24, 24, 0.005, 0.5, None, None

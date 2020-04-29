@@ -176,7 +176,7 @@ def deeSse_run_zone(ti_Img, mask_zone, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
     nTI=1, TI=ti_Img,                     # number of TI(s), TI (class dsi.Img)
     mask=mask_zone,           # mask value
     dataPointSet=[hd_pts],        # hard data
-    relativeDistanceFlag=True,
+    relativeDistanceFlag=False,
     distanceType=1,           # distance type: proportion of mismatching nodes (categorical var., default)
     nneighboringNode=n,       # max. number of neighbors (for the patterns)
     distanceThreshold=t,      # acceptation threshold (for distance between patterns)
@@ -256,11 +256,133 @@ def extract_simu_zone(simus,position):
     return extZones
 
 
+##########
+##########
+
+def simulation(file_path, data_name,  parameters, i):
+    #Simulation tests
+    test_deesse = parameters[0]
+    test_GRF    = parameters[1]
+    test_krig   = parameters[2]
+
+    #Ouput folder
+    name_simu_set = 'set_{}'.format(i)
+
+    #Create the output folder
+    if test_deesse == 'True'or test_GRF =='True':
+        #Nb of simulation
+        nbReal = int(parameters[3])
+
+        #Create the folder for the simulation
+        save_path_sim = '../simulation_outputs/simulation_'+name_simu_set+'/'
+
+        if not(os.path.exists(save_path_sim)):
+            os.mkdir(save_path_sim)
+        else: 
+            for root, dirs, files in os.walk(save_path_sim, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+
+                os.rmdir(save_path_sim)
+                os.mkdir(save_path_sim)
+
+    #DeeSse parameters
+    n = int(parameters[4])
+    t = float(parameters[5])
+    f = float(parameters[6])
 
 
+    ##########
+    #Kriging parameters
+    ##########
+
+    if test_krig == 'True':    
+        save_path_kri = '../simulation_outputs/simulation_krig_'+name_simu_set+'/'
+
+        #Create the folder for the kriging
+        if not(os.path.exists(save_path_kri)):
+                os.mkdir(save_path_kri)
+        else: 
+            for root, dirs, files in os.walk(save_path_kri, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+
+                os.rmdir(save_path_kri)
+                os.mkdir(save_path_kri)
+            
+    #Kriging and GRF parameters
+    if test_krig == 'True' or test_GRF == 'True':
+        rangeM = int(parameters[7])
+        sillM  = int(parameters[8])
+        cov_model = gcm.CovModel2D(elem=[
+        ('spherical', {'w':500., 'r':[1400]}), # elementary contribution
+                           ], alpha=0, name='model-2D test')
+        cov_fun   = cov_model.func()
+        vario_fun = cov_model.vario_func()
 
 
+    ###########
+    #Simulation
+    ###########
 
+    for name in data_name:
+
+        #Load Data
+        trueMNT, trend_cut, position, hd_df, ti, mask_box, mask_box_ti = read_data(file_path, name)
+
+        #Clear the ti
+        ti[ti == np.min(ti) ] = np.nan
+
+        #DeeSse run
+        if test_deesse == 'True':
+            #The whole Ti is used as conditionning data:
+            mask_ti = mask_box_ti      #mask of the ti plus the cutted part for the synthetic data
+            hd_pts  = create_hd(hd_df) #redefine the coord of the hd in the grid (ox =0, oy=0)
+            ti_img  = create_ti(ti)    #redefine the origin of the ti to ox=0, oy=0
+            simuMPS = deeSse_run_ti(ti_img, mask_ti, hd_pts, n=n, t=t, f=f, nReal = nbReal)
+            extrMPS = extract_simu_zone(simuMPS,position) #extract the simulated zone
+
+        else:
+            extrMPS = None
+
+        #GRF run
+        if test_GRF == 'True':
+            X,Y = create_hd_grf(hd_df,position)
+            dimension, spacing, origin = create_grid(position)
+
+            extensionMin = [grf.extension_min(r, n, s) for r, n, s in zip(cov_model.rxy(), dimension, spacing)]
+            simuGRF      = grf.grf2D(cov_fun, dimension, spacing, origin, x=X, v=Y, 
+                       extensionMin=extensionMin, nreal=int(nbReal))
+        else:
+            simuGRF = None
+
+        #Save simulation outputs
+        if test_deesse == 'True' or test_GRF == 'True':             
+            with open(save_path_sim+'simulation_'+name+'.pickle','wb') as file:
+                pickle.dump([trueMNT, trend_cut, [extrMPS, simuGRF], mask_box_ti, position], file, pickle.HIGHEST_PROTOCOL)
+
+        #Kriging run
+        if test_krig == 'True':
+            X,Y = create_hd_grf(hd_df,position)
+            dimension, spacing, origin = create_grid(position)
+
+            extensionMin = [grf.extension_min(r, n, s) for r, n, s in zip(cov_model.rxy(), dimension, spacing)]
+
+            std_test=True
+            #We recommend to not krig on the whole glacier but use the mean of GRF simulation
+            if std_test==True:
+                krige, krige_std = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin)
+            else:
+                krige = grf.krige2D(X, Y, cov_fun, dimension, spacing, origin, extensionMin=extensionMin, computeKrigSD=False)
+                krige_std = None
+
+            #Save kriging output         
+            with open(save_path_kri+'simulation_'+name+'.pickle','wb') as file:
+                pickle.dump([trueMNT, trend_cut, [krige, krige_std], mask_box_ti, position],file, pickle.HIGHEST_PROTOCOL)
 
 
 

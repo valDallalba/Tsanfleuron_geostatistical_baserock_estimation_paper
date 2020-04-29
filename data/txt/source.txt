@@ -1,0 +1,3 @@
+Data Temperature : https://www.meteosuisse.admin.ch/home/climat/le-climat-suisse-en-detail/temperature-moyenne-suisse/donn%C3%A9es-de-la-temperatur-moyenne-suisse-depuis-1864.html
+
+Data Precipitation : https://www.meteosuisse.admin.ch/home/climat/le-climat-suisse-en-detail/donnees-homogeneisees-depuis-1864.html?region=Carte&station=chd
