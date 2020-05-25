@@ -92,10 +92,8 @@ def create_ti(ti_arr, sx=1, sy=1, sz=1):
     ti : np array.
     '''
     
-    shape     = ti_arr.shape
-    ti        = np.copy(ti_arr)
-    ti[ti<-1] = np.nan #float(np.nan)
-
+    shape  = ti_arr.shape
+    ti     = np.copy(ti_arr)
     ti     = ti[np.newaxis,np.newaxis,:,:]
 
     ti_Img = img.Img( nx=int(shape[1]), ny=int(shape[0]), nz=1,     
@@ -268,8 +266,10 @@ def simulation(file_path, data_name,  parameters, i):
     #Ouput folder
     name_simu_set = 'set_{}'.format(i)
 
+    print(test_GRF=='True')
     #Create the output folder
     if test_deesse == 'True'or test_GRF =='True':
+        print('iiii')
         #Nb of simulation
         nbReal = int(parameters[3])
 
@@ -316,11 +316,15 @@ def simulation(file_path, data_name,  parameters, i):
             
     #Kriging and GRF parameters
     if test_krig == 'True' or test_GRF == 'True':
-        rangeM = int(parameters[7])
-        sillM  = int(parameters[8])
+        #rangeM = int(parameters[7])
+        #sillM  = int(parameters[8])
         cov_model = gcm.CovModel2D(elem=[
-        ('spherical', {'w':500., 'r':[1400]}), # elementary contribution
-                           ], alpha=0, name='model-2D test')
+    ('spherical', {'w':380., 'r':[324,228]}),
+    ('gaussian', {'w':90., 'r':[564,564]}),
+    ('gaussian', {'w':130., 'r':[10000,1000]}),
+    ('gaussian', {'w':20., 'r':[10000,1800]}),
+    ('spherical', {'w':20., 'r':[10000,1000]})# elementary contribution
+                       ], alpha=20, name='model-2D test')
         cov_fun   = cov_model.func()
         vario_fun = cov_model.vario_func()
 
@@ -362,7 +366,7 @@ def simulation(file_path, data_name,  parameters, i):
 
         #Save simulation outputs
         if test_deesse == 'True' or test_GRF == 'True':             
-            with open(save_path_sim+'simulation_'+name+'.pickle','wb') as file:
+            with open(save_path_sim+'simulation_'+name,'wb') as file:
                 pickle.dump([trueMNT, trend_cut, [extrMPS, simuGRF], mask_box_ti, position], file, pickle.HIGHEST_PROTOCOL)
 
         #Kriging run
@@ -381,7 +385,7 @@ def simulation(file_path, data_name,  parameters, i):
                 krige_std = None
 
             #Save kriging output         
-            with open(save_path_kri+'simulation_'+name+'.pickle','wb') as file:
+            with open(save_path_kri+'simulation_'+name,'wb') as file:
                 pickle.dump([trueMNT, trend_cut, [krige, krige_std], mask_box_ti, position],file, pickle.HIGHEST_PROTOCOL)
 
 

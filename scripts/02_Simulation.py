@@ -130,8 +130,12 @@ if test_krig == 'True' or test_GRF == 'True':
     print('The default model is set to be spherical.')
 
     cov_model = gcm.CovModel2D(elem=[
-    ('spherical', {'w':500., 'r':[1400]}), # elementary contribution
-                       ], alpha=0, name='model-2D test')
+    ('spherical', {'w':380., 'r':[324,228]}),
+    ('gaussian', {'w':90., 'r':[564,564]}),
+    ('gaussian', {'w':130., 'r':[10000,1000]}),
+    ('gaussian', {'w':20., 'r':[10000,1800]}),
+    ('spherical', {'w':20., 'r':[10000,1000]})# elementary contribution
+                       ], alpha=20,  name='model-2D test')
     cov_fun   = cov_model.func()
     vario_fun = cov_model.vario_func()
 

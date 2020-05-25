@@ -1,0 +1,2 @@
+DS_test,GRF_test,KRIG_test,nbReal,n,t,f,range,sill
+False,True,True,24,6,0.01,0.1,None,None

@@ -6,7 +6,6 @@ def volume_calculation(top_alt,bottom_alt):
 
     assert len(top_alt) != 0,"List of real altitude is empty. Error"
     assert len(bottom_alt) != 0,"List of simu altitude is empty. Error"
-    assert np.shape(top_alt) == np.shape(bottom_alt) ,"Size are uncompatible. Error"
 
     vol = np.sum(top_alt - bottom_alt)
 
@@ -119,11 +118,11 @@ def indice_calculationV(real_alt, simu_alt, sim_type):
 
     assert len(real_alt) != 0,"List of real altitude is empty. Error"
     assert len(simu_alt) != 0,"List of simu altitude is empty. Error"
-    assert np.shape(real_alt) == np.shape(simu_alt[0]) ,"Size are uncompatible. Error"
+    
 
     
     if sim_type == 'krig':
-
+        assert np.shape(real_alt) == np.shape(simu_alt[0]) ,"Size are uncompatible. Error"
         standard_dev = simu_alt[1]
         simu_alt     = simu_alt[0]        
         moyenne_err3 =  np.power(np.divide((simu_alt-real_alt),standard_dev),2)      
@@ -141,7 +140,7 @@ def indice_calculationV(real_alt, simu_alt, sim_type):
         
 
     if sim_type == 'mps':
-        
+        assert np.shape(real_alt) == np.shape(simu_alt[0]) ,"Size are uncompatible. Error"
         moyenne_simus = np.mean(simu_alt, axis=0)
         standard_dev  = np.std(simu_alt, axis=0)
         
