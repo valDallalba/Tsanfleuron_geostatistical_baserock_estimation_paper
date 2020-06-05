@@ -4,8 +4,8 @@ import numpy as np
 
 def volume_calculation(top_alt,bottom_alt):
 
-    assert len(top_alt) != 0,"List of real altitude is empty. Error"
-    assert len(bottom_alt) != 0,"List of simu altitude is empty. Error"
+    #assert len(top_alt) != 0,"List of real altitude is empty. Error"
+    #assert len(bottom_alt) != 0,"List of simu altitude is empty. Error"
 
     vol = np.sum(top_alt - bottom_alt)
 
@@ -131,10 +131,10 @@ def indice_calculationV(real_alt, simu_alt, sim_type):
         N   = np.size(standard_dev[st0]) * 1
         I1  = np.mean((simu_alt[st0] - real_alt[st0]))
         I2  = np.mean(np.abs(simu_alt[st0] - real_alt[st0]))
-        I3  = np.nansum(moyenne_err3[st0]/(N))
+        I3  = np.sum(moyenne_err3[st0])/N
 
-        volume     = volume_calculation(real_alt+50,simu_alt)
-        volumeReal = volume_calculation(real_alt+50,real_alt)
+        volume     = volume_calculation(np.max(real_alt)+4,simu_alt)
+        volumeReal = volume_calculation(np.max(real_alt)+4,real_alt)
 
         indices_out = [I1, I2, I3, simu_alt, standard_dev, volume, volumeReal]
         
@@ -144,23 +144,22 @@ def indice_calculationV(real_alt, simu_alt, sim_type):
         moyenne_simus = np.mean(simu_alt, axis=0)
         standard_dev  = np.std(simu_alt, axis=0)
         
-        volume     = [volume_calculation(real_alt+50,simu) for simu in simu_alt]
-        volumeReal = volume_calculation(real_alt+50,real_alt)
+        volume     = [volume_calculation(np.max(real_alt)+4,simu) for simu in simu_alt]
+        volumeReal = volume_calculation(np.max(real_alt)+4,real_alt)
         
         somme_simus        = np.nansum(simu_alt, axis=0)
         somme_erreurs      = np.nansum(simu_alt-real_alt, axis=0)
         sommes_erreurs_abs = np.nansum(np.abs(simu_alt-real_alt), axis=0)
         
-        moyenne_err3    = np.nansum((np.power((simu_alt-real_alt)/standard_dev,2)), axis=0)    
         moyenne_err     = np.divide(somme_erreurs,len(simu_alt))
         moyenne_err_abs = np.divide(sommes_erreurs_abs,len(simu_alt))
+        moyenne_err3    = np.nansum((np.power((simu_alt-real_alt)/standard_dev,2)), axis=0)    
 
         st0 = standard_dev != 0
         N   = np.size(standard_dev[st0]) * len(simu_alt)
         I1  = np.mean(moyenne_err[st0])
         I2  = np.mean(moyenne_err_abs[st0])
         I3  = np.sum(moyenne_err3[st0]/(N))
-        volumeReal = volume_calculation(real_alt+50,real_alt)
         
         indices_out = [I1, I2, I3, moyenne_simus, standard_dev, volume, volumeReal]
         
