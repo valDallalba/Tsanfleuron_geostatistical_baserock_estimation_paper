@@ -98,7 +98,7 @@ def create_ti(ti_arr, sx=1, sy=1, sz=1):
 
     ti_Img = img.Img( nx=int(shape[1]), ny=int(shape[0]), nz=1,     
                       sx=sx, sy=sy, sz=sz,
-                      ox=0.0, oy=0.0, oz=0.0,
+                      ox=-0.5*sx, oy=-0.5*sy, oz=-0.5*sz,
                       nv=1, val=ti.astype('float64'), varname=['alt']
             )
     
@@ -132,6 +132,7 @@ def deeSse_run_ti(ti_Img, mask_ti, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
     mask=mask_ti,                 # mask value
     dataPointSet=[hd_pts,hdpt2],      # hard data
     relativeDistanceFlag=True,
+    conditioningWeightFactor=10.,
     distanceType=1,           # distance type: proportion of mismatching nodes (categorical var., default)
     nneighboringNode=n,       # max. number of neighbors (for the patterns)
     distanceThreshold=t,      # acceptation threshold (for distance between patterns)
@@ -149,48 +150,6 @@ def deeSse_run_ti(ti_Img, mask_ti, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
     
     return sim
 
-
-##########
-##########
-
-def deeSse_run_zone(ti_Img, mask_zone, hd_pts, n=12, t=0.05, f=0.50, nReal=1):
-    '''
-    DeeSse run, where the simulation use the TI as conditionning data.
-    Simulation with pyramides.
-    The MPS simulation complete the missing part of the TI.
-    ti_Img : Img format, the ti with the extracted zone remove.
-    mask_zone : Img format, the mask that take only the extracted zone.
-    hd_pts  : pointSet format, the fictives point Set.
-    '''
-    
-    pyrGenParams = dsi.PyramidGeneralParameters(npyramidLevel=2, kx=[2, 2], ky=[2, 2], kz=[0, 0])
-    pyrParams    = dsi.PyramidParameters(nlevel=2, pyramidType='continuous')
-    
-    deesse_input =   dsi.DeesseInput(
-    nx=ti_Img.nx, ny=ti_Img.ny, nz=ti_Img.nz,     # dimension of the simulation grid (number of cells)
-    sx=ti_Img.sx, sy=ti_Img.sy, sz=ti_Img.sz,     # cells units in the simulation grid (here are the default values)
-    ox=ti_Img.ox, oy=ti_Img.oy, oz=ti_Img.oz,     # origin of the simulation grid (here are the default values)
-    nv=1, varname='alt',                  # number of variable(s), name of the variable(s)
-    nTI=1, TI=ti_Img,                     # number of TI(s), TI (class dsi.Img)
-    mask=mask_zone,           # mask value
-    dataPointSet=[hd_pts],        # hard data
-    relativeDistanceFlag=False,
-    distanceType=1,           # distance type: proportion of mismatching nodes (categorical var., default)
-    nneighboringNode=n,       # max. number of neighbors (for the patterns)
-    distanceThreshold=t,      # acceptation threshold (for distance between patterns)
-    maxScanFraction=f,        # max. scanned fraction of the TI (for simulation of each cell)
-    
-    pyramidGeneralParameters=pyrGenParams, # pyramid general parameters
-    pyramidParameters=pyrParams,           # pyramid parameters for each variable
-        
-    npostProcessingPathMax=1, # number of post-processing path(s)
-    seed=444,                 # seed (initialization of the random number generator)
-    nrealization=nReal) 
-    
-    deesse_output = dsi.deesseRun(deesse_input)
-    sim = deesse_output['sim']
-    
-    return sim
 
 
 ####################
@@ -216,7 +175,7 @@ def create_hd_grf(hd_df, position):
 def create_grid(position):
     nx,ny = int(position[1]-position[0]), int(position[3]-position[2])
     sx,sy = 1.0, 1.0
-    ox,oy = float(position[0]), float(position[2])
+    ox,oy = float(position[0])-0.5*sx, float(position[2])-0.5*sy
     
     dimension = [nx,ny]
     spacing   = [sx,sy]
@@ -264,12 +223,10 @@ def simulation(file_path, data_name,  parameters, i):
     test_krig   = parameters[2]
 
     #Ouput folder
-    name_simu_set = 'set_{}'.format(i)
+    name_simu_set = 'set_{:02d}'.format(i)
 
-    print(test_GRF=='True')
     #Create the output folder
     if test_deesse == 'True'or test_GRF =='True':
-        print('iiii')
         #Nb of simulation
         nbReal = int(parameters[3])
 

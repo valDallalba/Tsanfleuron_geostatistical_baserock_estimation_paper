@@ -228,7 +228,7 @@ for lineit in range(num_img):
     mask_box_ti[mask_box_ti == np.nanmin(mask_box_ti)] = 0
     mask_box_ti[mask_box_ti > np.nanmin(mask_box_ti)]  = 1    
     
-    with open(save_path + '/' + synthe_name + str(lineit) + '.pickle', 'wb') as f:
+    with open(save_path + '/' + synthe_name + str(lineit).zfill(2) + '.pickle', 'wb') as f:
         pickle.dump([trueMNT, position, hd_df, ti, mask_box, mask_box_ti], f, pickle.HIGHEST_PROTOCOL)
         
         

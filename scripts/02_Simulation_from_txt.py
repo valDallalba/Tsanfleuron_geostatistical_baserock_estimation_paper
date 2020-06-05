@@ -90,6 +90,6 @@ for i, parameters in enumerate(parameters_set):
     print('Set {} is done !! /n'.format(i))
     
 stop = time.time()
-timeRum = stop-start
-print(timeRum)
+timeRun = stop-start
+print('Simulation time is : {}s.\n'.format(timeRun))
 print('All the simulation set are done !!!!')

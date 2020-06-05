@@ -285,7 +285,7 @@ for lineit in range(num_img):
     
 
     
-    with open(save_path + '/' + synthe_name + str(lineit) + '.pickle', 'wb') as f:
+    with open(save_path + '/' + synthe_name + str(lineit).zfill(2) + '.pickle', 'wb') as f:
         pickle.dump([trueMNT, trend_cut, position, hd_df, ti, mask_box, mask_box_ti], f, pickle.HIGHEST_PROTOCOL)
                 
         
