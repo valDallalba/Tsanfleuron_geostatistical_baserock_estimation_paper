@@ -2,3 +2,4 @@ DS_test, GRF_test, KRIG_test, nbReal, n, t, f, range, sill
 True, False, False, 64, 6, 0.01, 0.5, None, None
 True, False, False, 64, 24, 0.01, 0.5, None, None
 True, False, False, 64, 48, 0.01, 0.5, None, None
+True,False,False,64,120,0.05,0.5, None, None
