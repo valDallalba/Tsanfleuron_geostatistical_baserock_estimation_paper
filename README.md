@@ -20,7 +20,9 @@ Ground-penetrating radar (GPR) is widely used to estimate glacier thickness, but
 
 Traditional interpolation methods like **Ordinary kriging** or **Sequential Gaussian simulation (SGS)** often fail to reproduce realistic basal structures and tend to underestimate associated uncertainty.
 
----
+<p align="center">
+  <img src="images/image_read_1.png" alt="Glacier bedrock data" width="600"/>
+</p>---
 
 ## 💡 Solution
 
@@ -40,5 +42,9 @@ We evaluate MPS against kriging and SGS on:
 ## 🧊 Key Results
 
 Estimated ice volume for the **Scex Rouge** and **Tsanfleuron** glaciers : **113.9 ± 1.6 million m³**
-
 MPS accurately captures basal morphology and uncertainty, improving the quality of subglacial flow and hydrology modeling.
+
+<p align="center">
+  <img src="images/image_read_2.png" alt="Glacier bedrock result" width="600"/>
+</p>---
+
