@@ -2,7 +2,7 @@
 
 **Author**: Alexis Neven and Valentin Dall'Alba  
 **Publication**: The Cryosphere, 2021  
-**DOI**: https://doi.org/10.5194/tc-15-5169-2021 (https://tc.copernicus.org/articles/15/5169/2021/)  
+**DOI**: https://doi.org/10.5194/tc-15-5169-2021
 
 ---
 
